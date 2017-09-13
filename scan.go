@@ -11,12 +11,12 @@ import (
 	"image/gif"
 	"strings"
 	"github.com/ricardolonga/jsongo"
+	"encoding/json"
 )
 
 type Encode struct {
-	code int
-	msg  string
-	text string
+	msg  string `json:"msg"`
+	text string `json:"text"`
 }
 
 func main() {
@@ -41,7 +41,9 @@ func main() {
 		data.Put("text", s.Data).
 			Put("type", s.Type.Name()).
 			Put("quality", s.Quality)
-		fmt.Println(outPut(s.Type.Name(), s.Data, s.Quality))
+		outPut(Encode{
+			text: s.Data,
+		})
 	}
 }
 
@@ -96,10 +98,17 @@ func Substr(str string, start int, length int) string {
 }
 
 // 统一输出格式
-func outPut(codeType string, text string, quality int) string {
-	data := jsongo.Object()
-	data.Put("text", text).
-		Put("type", codeType).
-		Put("quality", quality)
-	return data.String()
+func outPut(encode Encode) {
+	if encode.msg == "" {
+		encode.msg = "success"
+	}
+
+	j, errs := json.Marshal(encode) //转换成JSON返回的是byte[]
+	if errs != nil {
+		fmt.Println(errs.Error())
+	}
+
+	fmt.Println(string(j)) //byte[]转换成string 输出
+	fmt.Println(encode)
+
 }
